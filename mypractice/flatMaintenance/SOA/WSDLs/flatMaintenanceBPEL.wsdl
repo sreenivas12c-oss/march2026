@@ -1,0 +1,54 @@
+<?xml version= '1.0' encoding= 'UTF-8' ?>
+<wsdl:definitions
+     name="flatMaintenanceBPEL"
+     targetNamespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+     xmlns:client="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+     xmlns:cor="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL/correlationset"
+     xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+     xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+    >
+    <plnk:partnerLinkType name="flatMaintenanceBPEL">
+        <plnk:role name="flatMaintenanceBPELProvider" portType="client:flatMaintenanceBPEL"/>
+        <plnk:role name="flatMaintenanceBPELRequester" portType="client:flatMaintenanceBPELCallback"/>
+    </plnk:partnerLinkType>
+    <vprop:propertyAlias propertyName="cor:FlatID" xmlns:ns1="http://xmlns.oracle.com/mypractice/flatMaintenanceTotal/flatMaintenanceTotalBPEL"
+         messageType="ns1:flatMaintenanceTotalBPELRequestMessage" part="payload">
+        <vprop:query>ns1:flatNo</vprop:query>
+    </vprop:propertyAlias>
+    <vprop:propertyAlias propertyName="cor:FlatID" xmlns:client="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+         messageType="client:flatMaintenanceTotalBPELResponseMessage" part="payload">
+        <vprop:query>client:flatNo</vprop:query>
+    </vprop:propertyAlias>
+    <wsdl:import namespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL/correlationset"
+         location="flatMaintenanceBPEL_properties.wsdl"/>
+    <wsdl:types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+                 schemaLocation="../Schemas/flatMaintenanceBPEL.xsd"/>
+        </schema>
+    </wsdl:types>
+    <wsdl:message name="flatMaintenanceBPELRequestMessage">
+        <wsdl:part name="payload" element="client:processRequest"/>
+    </wsdl:message>
+    <wsdl:message name="flatMaintenanceTotalBPELResponseMessage">
+        <wsdl:part name="payload" element="client:processTotalResponse"/>
+    </wsdl:message>
+    <wsdl:message name="flatMaintenanceBPELResponseMessage">
+        <wsdl:part name="payload" element="client:processResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="flatMaintenanceBPEL">
+        <wsdl:operation name="flatMaintenance">
+            <wsdl:input message="client:flatMaintenanceBPELRequestMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="flatMaintenanceTotal">
+            <wsdl:input message="client:flatMaintenanceTotalBPELResponseMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:portType name="flatMaintenanceBPELCallback">
+        <wsdl:operation name="processResponse">
+            <wsdl:input message="client:flatMaintenanceBPELResponseMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+</wsdl:definitions>

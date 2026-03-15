@@ -1,0 +1,26 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<xs:schema targetNamespace="http://xmlns.oracle.com/pcbpel/adapter/db/top/dbReference" xmlns="http://xmlns.oracle.com/pcbpel/adapter/db/top/dbReference" elementFormDefault="qualified" attributeFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+   <xs:element name="ErrorLogCollection" type="ErrorLogCollection"/>
+   <xs:complexType name="ErrorLogCollection">
+      <xs:sequence>
+         <xs:element name="ErrorLog" type="ErrorLog" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+   </xs:complexType>
+   <xs:complexType name="ErrorLog">
+      <xs:sequence>
+         <xs:element name="flowid" type="xs:integer"/>
+         <xs:element name="faultCode" type="xs:string" minOccurs="0" nillable="true"/>
+         <xs:element name="faultSummery" type="xs:string" minOccurs="0" nillable="true"/>
+         <xs:element name="faultDetails" type="xs:string" minOccurs="0" nillable="true"/>
+         <xs:element name="attribut1" type="string255" minOccurs="0" nillable="true"/>
+         <xs:element name="attribut2" type="string255" minOccurs="0" nillable="true"/>
+         <xs:element name="attribut3" type="string255" minOccurs="0" nillable="true"/>
+         <xs:element name="attribut4" type="string255" minOccurs="0" nillable="true"/>
+      </xs:sequence>
+   </xs:complexType>
+   <xs:simpleType name="string255">
+      <xs:restriction base="xs:string">
+         <xs:maxLength value="255"/>
+      </xs:restriction>
+   </xs:simpleType>
+</xs:schema>

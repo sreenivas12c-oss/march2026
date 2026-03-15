@@ -1,0 +1,201 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Sat Feb 14 13:03:50 IST 2026
+  Author:  sreen
+  Type: BPEL 2.0 Process
+  Purpose: Synchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="distributedtrancationBPEL"
+               targetNamespace="http://xmlns.oracle.com/mypractice/distributedTrancation/distributedtrancationBPEL"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/mypractice/distributedTrancation/distributedtrancationBPEL"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:ui="http://xmlns.oracle.com/soa/designer"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/mypractice/distributedTrancation/dbReference"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/top/dbReference"
+         xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/jms/mypractice/distributedTrancation/jmsReference"
+         xmlns:oraext="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"
+         xmlns:bpm="http://xmlns.oracle.com/bpmn20/extensions"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ess="http://xmlns.oracle.com/scheduler" xmlns:hwf="http://xmlns.oracle.com/bpel/workflow/xpath"
+         xmlns:xref="http://www.oracle.com/XSL/Transform/java/oracle.tip.xref.xpath.XRefXPathFunctions"
+         xmlns:dvm="http://www.oracle.com/XSL/Transform/java/oracle.tip.dvm.LookupValue"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xdk="http://schemas.oracle.com/bpel/extension/xpath/function/xdk"
+         xmlns:ids="http://xmlns.oracle.com/bpel/services/IdentityService/xpath"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+         xmlns:ns4="http://xmlns.oracle.com/mypractice/Error/ErrorBPEL">
+  <import namespace="http://schemas.oracle.com/bpel/extension" location="../WSDLs/RuntimeFault.wsdl"
+          importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/mypractice/distributedTrancation/distributedtrancationBPEL" location="../WSDLs/distributedtrancationBPEL.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    --> 
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="distributedtrancationbpel_client" partnerLinkType="client:distributedtrancationBPEL" myRole="distributedtrancationBPELProvider"/>
+    <partnerLink name="dbReference" partnerLinkType="ns1:dbReference_plt" partnerRole="dbReference_role"/>
+    <partnerLink name="jmsReference" partnerLinkType="ns3:Produce_Message_plt" partnerRole="Produce_Message_role"/>
+    <partnerLink name="ErrorSOAPReference" partnerLinkType="ns4:ErrorBPEL" partnerRole="ErrorBPELProvider"/>
+  </partnerLinks>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable" messageType="client:distributedtrancationBPELRequestMessage"/>
+
+    <!-- Reference to the message that will be returned to the requester-->
+    <variable name="outputVariable" messageType="client:distributedtrancationBPELResponseMessage"/>
+    <variable name="Invoke1_insert_InputVariable" messageType="ns1:DistributedtransactionCollection_msg"/>
+    <variable name="InvokeJMS_Produce_Message_InputVariable" messageType="ns3:Produce_Message_msg"/>
+    <variable name="VariableFault" type="xsd:string"/>
+    <variable name="ErrInvoke_process_InputVariable" messageType="ns4:ErrorBPELRequestMessage"/>
+  </variables>
+  <faultHandlers>
+    <catchAll>
+      <assign name="AssignError">
+        <copy>
+          <from>ora:getFaultName()</from>
+          <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$outputVariable.payload/client:result</to>
+        </copy>
+      </assign>
+    </catchAll>
+  </faultHandlers>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+
+    <!-- Receive input from requestor. (Note: This maps to operation defined in distributedtrancationBPEL.wsdl) -->
+    <receive name="receiveInput" partnerLink="distributedtrancationbpel_client" portType="client:distributedtrancationBPEL" operation="process" variable="inputVariable" createInstance="yes"/>
+    <scope name="JMSScope">
+      <faultHandlers>
+        <catchAll>
+          <rethrow name="Rethrow1"/>
+        </catchAll>
+      </faultHandlers>
+      <sequence name="JMSsequence">
+        <assign name="AssignJMS">
+          <copy>
+            <from>$inputVariable.payload/client:Num</from>
+            <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$InvokeJMS_Produce_Message_InputVariable.body/client:Num</to>
+          </copy>
+          <copy>
+            <from>$inputVariable.payload/client:Name</from>
+            <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$InvokeJMS_Produce_Message_InputVariable.body/client:Name</to>
+          </copy>
+        </assign>
+        <invoke name="InvokeJMS" partnerLink="jmsReference" portType="ns3:Produce_Message_ptt"
+                operation="Produce_Message" inputVariable="InvokeJMS_Produce_Message_InputVariable"
+                bpelx:invokeAsDetail="no"/>
+      </sequence>
+    </scope>
+    <scope name="DBScope">
+      <faultHandlers>
+        <catch faultName="bpelx:bindingFault" faultVariable="faultVar"
+               faultMessageType="bpelx:RuntimeFaultMessage" bpelx:name="bindingERR2">
+          <sequence>
+            <assign name="Assign1">
+              <copy>
+                <from>$faultVar.code</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$ErrInvoke_process_InputVariable.payload/ns4:Fault_Code</to>
+              </copy>
+              <copy>
+                <from>$faultVar.summary</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$ErrInvoke_process_InputVariable.payload/ns4:Fault_Summery</to>
+              </copy>
+              <copy>
+                <from>$faultVar.detail</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$ErrInvoke_process_InputVariable.payload/ns4:Fault_Details</to>
+              </copy>
+              <copy>
+                <from>ora:getFlowId()</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$ErrInvoke_process_InputVariable.payload/ns4:FlowID</to>
+              </copy>
+              <copy>
+                <from>ora:getCompositeName()</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$ErrInvoke_process_InputVariable.payload/ns4:Attribut1</to>
+              </copy>
+              <copy>
+                <from>ora:getRevision()</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$ErrInvoke_process_InputVariable.payload/ns4:Attribut2</to>
+              </copy>
+              <copy>
+                <from>ora:getFaultName()</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$ErrInvoke_process_InputVariable.payload/ns4:Attribut3</to>
+              </copy>
+              <copy>
+                <from>xp20:current-dateTime()</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$ErrInvoke_process_InputVariable.payload/ns4:Attribut4</to>
+              </copy>
+            </assign>
+            <invoke name="Invoke1" partnerLink="ErrorSOAPReference" portType="ns4:ErrorBPEL" inputVariable="ErrInvoke_process_InputVariable"
+                    bpelx:invokeAsDetail="no"/>
+          </sequence>
+        </catch>
+        <catchAll>
+          <sequence name="Sequence1">
+            <assign name="AssignFault">
+              <copy>
+                <from>ora:getFaultName()</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$VariableFault</to>
+              </copy>
+              <copy>
+                <from>$VariableFault</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$outputVariable.payload/client:result</to>
+              </copy>
+            </assign>
+            <reply name="Reply1" partnerLink="distributedtrancationbpel_client" variable="outputVariable"
+                   portType="client:distributedtrancationBPEL" operation="process"/>
+            <exit name="Exit1"/>
+          </sequence>
+        </catchAll>
+      </faultHandlers>
+      <sequence name="DBsequence">
+        <assign name="AssignInput">
+          <copy>
+            <from>$inputVariable.payload/client:Num</from>
+            <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$Invoke1_insert_InputVariable.DistributedtransactionCollection/ns2:Distributedtransaction/ns2:num</to>
+          </copy>
+          <copy>
+            <from>$inputVariable.payload/client:Name</from>
+            <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$Invoke1_insert_InputVariable.DistributedtransactionCollection/ns2:Distributedtransaction/ns2:name</to>
+          </copy>
+        </assign>
+        <invoke name="InvokeDB" partnerLink="dbReference" portType="ns1:dbReference_ptt" operation="insert"
+                inputVariable="Invoke1_insert_InputVariable" bpelx:invokeAsDetail="no"/>
+      </sequence>
+    </scope>
+    <assign name="AssignOut">
+      <copy>
+        <from>'Success'</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$outputVariable.payload/client:result</to>
+      </copy>
+    </assign>
+    <!-- Generate reply to synchronous request -->
+    <reply name="replyOutput" partnerLink="distributedtrancationbpel_client" portType="client:distributedtrancationBPEL" operation="process" variable="outputVariable"/>
+  </sequence>
+</process>

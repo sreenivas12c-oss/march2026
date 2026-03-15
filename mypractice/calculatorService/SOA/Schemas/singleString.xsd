@@ -1,0 +1,21 @@
+<schema attributeFormDefault="unqualified"
+	elementFormDefault="qualified"
+	targetNamespace="http://xmlns.oracle.com/singleString"
+	xmlns="http://www.w3.org/2001/XMLSchema">
+ <element name="request">
+  <complexType>
+   <sequence>
+    <element name="numA" type="integer"/>
+      <element name="numB" type="integer"/>
+        <element name="operator" type="string"/>
+   </sequence>
+  </complexType>
+ </element>
+ <element name="response">
+  <complexType>
+   <sequence>
+    <element name="result" type="integer"/>
+   </sequence>
+  </complexType>
+ </element>
+</schema>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+     name="flatMaintenanceBPEL"
+     targetNamespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+     xmlns:client="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+     xmlns:cor="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL/correlationset"
+     xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+     xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    >
+    <wsdl:documentation>
+        <abstractWSDL>http://Srinivas:7101/soa-infra/services/default/flatMaintenance!1.0/WSDLs/flatMaintenanceBPEL.wsdl</abstractWSDL>
+    </wsdl:documentation>
+    <plnk:partnerLinkType name="flatMaintenanceBPEL">
+        <plnk:role name="flatMaintenanceBPELRequester" portType="client:flatMaintenanceBPELCallback"/>
+        <plnk:role name="flatMaintenanceBPELProvider" portType="client:flatMaintenanceBPEL"/>
+    </plnk:partnerLinkType>
+    <vprop:propertyAlias xmlns:ns1="http://xmlns.oracle.com/mypractice/flatMaintenanceTotal/flatMaintenanceTotalBPEL"
+         propertyName="cor:FlatID" messageType="ns1:flatMaintenanceTotalBPELRequestMessage"
+         part="payload">
+        <vprop:query>ns1:flatNo</vprop:query>
+    </vprop:propertyAlias>
+    <vprop:propertyAlias xmlns:client="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+         propertyName="cor:FlatID" messageType="client:flatMaintenanceTotalBPELResponseMessage"
+         part="payload">
+        <vprop:query>client:flatNo</vprop:query>
+    </vprop:propertyAlias>
+    <wsdl:import namespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL/correlationset"
+         location="flatmaintenancebpel_client_ep_WSDL_flatMaintenanceBPEL_properties.wsdl"/>
+    <wsdl:types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+                 schemaLocation="../Schemas/flatMaintenanceBPEL.xsd"/>
+        </schema>
+    </wsdl:types>
+    <wsdl:message name="flatMaintenanceBPELRequestMessage">
+        <wsdl:part name="payload" element="client:processRequest"/>
+    </wsdl:message>
+    <wsdl:message name="flatMaintenanceTotalBPELResponseMessage">
+        <wsdl:part name="payload" element="client:processTotalResponse"/>
+    </wsdl:message>
+    <wsdl:message name="flatMaintenanceBPELResponseMessage">
+        <wsdl:part name="payload" element="client:processResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="flatMaintenanceBPEL">
+        <wsdl:operation name="flatMaintenance">
+            <wsdl:input message="client:flatMaintenanceBPELRequestMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="flatMaintenanceTotal">
+            <wsdl:input message="client:flatMaintenanceTotalBPELResponseMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:portType name="flatMaintenanceBPELCallback">
+        <wsdl:operation name="processResponse">
+            <wsdl:input message="client:flatMaintenanceBPELResponseMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="flatMaintenanceBPELBinding" type="client:flatMaintenanceBPEL">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="flatMaintenance">
+            <soap:operation style="document" soapAction="flatMaintenance"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="flatMaintenanceTotal">
+            <soap:operation style="document" soapAction="flatMaintenanceTotal"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="flatmaintenancebpel_client_ep">
+        <wsdl:port name="flatMaintenanceBPEL_pt" binding="client:flatMaintenanceBPELBinding">
+            <soap:address location="http://Srinivas:7101/soa-infra/services/default/flatMaintenance/flatmaintenancebpel_client_ep"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

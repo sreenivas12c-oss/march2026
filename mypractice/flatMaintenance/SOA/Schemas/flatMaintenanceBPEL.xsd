@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<schema attributeFormDefault="unqualified"
+	elementFormDefault="qualified"
+	targetNamespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+	xmlns="http://www.w3.org/2001/XMLSchema">
+	<element name="processRequest">
+		<complexType>
+			<sequence>
+				<element name="flatNo" type="string"/>
+                                <element name="flatOwner" type="string"/>
+                                <element name="currentBill" type="integer"/>
+                                <element name="maintenance" type="integer"/>
+                                <element name="waterBill" type="integer"/>
+			</sequence>
+		</complexType>
+	</element>
+	<element name="processResponse">
+		<complexType>
+			<sequence>
+				<element name="flatNo" type="string"/>
+                                <element name="flatOwner" type="string"/>
+                                <element name="totalBill" type="integer"/>
+			</sequence>
+		</complexType>
+	</element>
+        <element name="processTotalResponse">
+		<complexType>
+			<sequence>
+				<element name="flatNo" type="string"/>
+                                <element name="flatOwner" type="string"/>
+                                <element name="totalBill" type="integer"/>
+			</sequence>
+		</complexType>
+	</element>
+</schema>

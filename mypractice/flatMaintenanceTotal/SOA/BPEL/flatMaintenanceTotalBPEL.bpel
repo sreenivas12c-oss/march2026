@@ -1,0 +1,90 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Fri Feb 13 15:17:51 IST 2026
+  Author:  sreen
+  Type: BPEL 2.0 Process
+  Purpose: One Way BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="flatMaintenanceTotalBPEL"
+               targetNamespace="http://xmlns.oracle.com/mypractice/flatMaintenanceTotal/flatMaintenanceTotalBPEL"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/mypractice/flatMaintenanceTotal/flatMaintenanceTotalBPEL"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+               xmlns:ui="http://xmlns.oracle.com/soa/designer"
+               xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+         xmlns:oraext="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.ExtFunc"
+         xmlns:bpm="http://xmlns.oracle.com/bpmn20/extensions"
+         xmlns:xp20="http://www.oracle.com/XSL/Transform/java/oracle.tip.pc.services.functions.Xpath20"
+         xmlns:ess="http://xmlns.oracle.com/scheduler" xmlns:hwf="http://xmlns.oracle.com/bpel/workflow/xpath"
+         xmlns:xref="http://www.oracle.com/XSL/Transform/java/oracle.tip.xref.xpath.XRefXPathFunctions"
+         xmlns:dvm="http://www.oracle.com/XSL/Transform/java/oracle.tip.dvm.LookupValue"
+         xmlns:bpws="http://schemas.xmlsoap.org/ws/2003/03/business-process/"
+         xmlns:xdk="http://schemas.oracle.com/bpel/extension/xpath/function/xdk"
+         xmlns:ids="http://xmlns.oracle.com/bpel/services/IdentityService/xpath"
+         xmlns:ldap="http://schemas.oracle.com/xpath/extension/ldap">
+
+  <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/mypractice/flatMaintenanceTotal/flatMaintenanceTotalBPEL" location="../WSDLs/flatMaintenanceTotalBPEL.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  --> 
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="flatmaintenancetotalbpel_client" partnerLinkType="client:flatMaintenanceTotalBPEL" myRole="flatMaintenanceTotalBPELProvider"/>
+    <partnerLink name="flatMaintenanceReference" partnerLinkType="ns1:flatMaintenanceBPEL"
+                 partnerRole="flatMaintenanceBPELProvider"/>
+  </partnerLinks>
+  <variables>
+    <variable name="Receive1_process_InputVariable" messageType="client:flatMaintenanceTotalBPELRequestMessage"/>
+    <variable name="FMTR_flatMaintenanceTotal_InputVariable" messageType="ns1:flatMaintenanceTotalBPELResponseMessage"/>
+  </variables>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+
+    <!-- Receive input from requestor. (Note: This maps to operation defined in flatMaintenanceTotalBPEL.wsdl) -->
+    <receive name="Receive1" partnerLink="flatmaintenancetotalbpel_client" portType="client:flatMaintenanceTotalBPEL"
+             operation="process" variable="Receive1_process_InputVariable" createInstance="yes"/>
+    <assign name="AssignInput">
+      <copy>
+        <from>$Receive1_process_InputVariable.payload/client:flatNo</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$FMTR_flatMaintenanceTotal_InputVariable.payload/ns1:flatNo</to>
+      </copy>
+      <copy>
+        <from>$Receive1_process_InputVariable.payload/client:flatOwner</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$FMTR_flatMaintenanceTotal_InputVariable.payload/ns1:flatOwner</to>
+      </copy>
+      <copy>
+        <from>$Receive1_process_InputVariable.payload/client:currentBill+$Receive1_process_InputVariable.payload/client:maintenance+$Receive1_process_InputVariable.payload/client:waterBill</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$FMTR_flatMaintenanceTotal_InputVariable.payload/ns1:totalBill</to>
+      </copy>
+    </assign>
+    <invoke name="FMTR" partnerLink="flatMaintenanceReference"
+            portType="ns1:flatMaintenanceBPEL" operation="flatMaintenanceTotal"
+            inputVariable="FMTR_flatMaintenanceTotal_InputVariable" bpelx:invokeAsDetail="no"/>
+  </sequence>
+</process>

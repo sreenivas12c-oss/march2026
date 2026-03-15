@@ -1,0 +1,132 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Fri Feb 13 14:58:15 IST 2026
+  Author:  sreen
+  Type: BPEL 2.0 Process
+  Purpose: Asynchronous BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="flatMaintenanceBPEL"
+         targetNamespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:client="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL"
+         xmlns:ora="http://schemas.oracle.com/xpath/extension"
+         xmlns:ui="http://xmlns.oracle.com/soa/designer"
+         xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+         xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/mypractice/flatMaintenanceTotal/flatMaintenanceTotalBPEL"
+         xmlns:ns2="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL/correlationset">
+    <bpelx:annotation>
+        <bpelx:analysis>
+            <bpelx:property name="propertiesFile">
+                <![CDATA[../WSDLs/flatMaintenanceBPEL_properties.wsdl]]>
+            </bpelx:property>
+        </bpelx:analysis>
+    </bpelx:annotation>
+    <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/mypractice/flatMaintenance/flatMaintenanceBPEL" location="../WSDLs/flatMaintenanceBPEL.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        PARTNERLINKS                                                      
+        List of services participating in this BPEL process               
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    --> 
+    <partnerLinks>
+        <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+        <partnerLink name="flatmaintenancebpel_client" partnerLinkType="client:flatMaintenanceBPEL" myRole="flatMaintenanceBPELProvider" partnerRole="flatMaintenanceBPELRequester"/>
+        <partnerLink name="flatTotalReference" partnerLinkType="ns1:flatMaintenanceTotalBPEL"
+                     partnerRole="flatMaintenanceTotalBPELProvider"/>
+    </partnerLinks>
+
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        VARIABLES                                                        
+        List of messages and XML documents used within this BPEL process 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <variables>
+        <!-- Reference to the message passed as input during initiation -->
+        <variable name="inputVariable" messageType="client:flatMaintenanceBPELRequestMessage"/>
+
+        <!-- Reference to the message that will be sent back to the requester during callback -->
+        <variable name="outputVariable" messageType="client:flatMaintenanceBPELResponseMessage"/>
+        <variable name="FMT_process_InputVariable" messageType="ns1:flatMaintenanceTotalBPELRequestMessage"/>
+        <variable name="Receive1_flatMaintenanceTotal_InputVariable"
+                  messageType="client:flatMaintenanceTotalBPELResponseMessage"/>
+    </variables>
+    <correlationSets>
+        <correlationSet name="flatCorrelationSet" properties="ns2:FlatID"/>
+    </correlationSets>
+    <!-- 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       ORCHESTRATION LOGIC                                               
+       Set of activities coordinating the flow of messages across the    
+       services integrated within this business process                  
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    -->
+    <sequence name="main">
+        <!-- Receive input from requestor. (Note: This maps to operation defined in flatMaintenanceBPEL.wsdl) -->
+        <receive name="receiveInput" partnerLink="flatmaintenancebpel_client" portType="client:flatMaintenanceBPEL"
+                 operation="flatMaintenance" variable="inputVariable" createInstance="yes"/>
+        <assign name="AssignInput">
+            <copy>
+                <from>$inputVariable.payload/client:flatNo</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$FMT_process_InputVariable.payload/ns1:flatNo</to>
+            </copy>
+            <copy>
+                <from>$inputVariable.payload/client:flatOwner</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$FMT_process_InputVariable.payload/ns1:flatOwner</to>
+            </copy>
+            <copy>
+                <from>$inputVariable.payload/client:currentBill</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$FMT_process_InputVariable.payload/ns1:currentBill</to>
+            </copy>
+            <copy>
+                <from>$inputVariable.payload/client:maintenance</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$FMT_process_InputVariable.payload/ns1:maintenance</to>
+            </copy>
+            <copy>
+                <from>$inputVariable.payload/client:waterBill</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$FMT_process_InputVariable.payload/ns1:waterBill</to>
+            </copy>
+        </assign>
+        <invoke name="FMT" partnerLink="flatTotalReference"
+                portType="ns1:flatMaintenanceTotalBPEL" operation="process" inputVariable="FMT_process_InputVariable"
+                bpelx:invokeAsDetail="no">
+            <correlations>
+                <correlation set="flatCorrelationSet" initiate="yes"/>
+            </correlations>
+        </invoke>
+        <receive name="Receive1" partnerLink="flatmaintenancebpel_client" portType="client:flatMaintenanceBPEL"
+                 operation="flatMaintenanceTotal" variable="Receive1_flatMaintenanceTotal_InputVariable">
+            <correlations>
+                <correlation set="flatCorrelationSet" initiate="no"/>
+            </correlations>
+        </receive>
+        <assign name="Assign1">
+            <copy>
+                <from>$Receive1_flatMaintenanceTotal_InputVariable.payload/client:flatNo</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$outputVariable.payload/client:flatNo</to>
+            </copy>
+            <copy>
+                <from>$Receive1_flatMaintenanceTotal_InputVariable.payload/client:flatOwner</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$outputVariable.payload/client:flatOwner</to>
+            </copy>
+            <copy>
+                <from>$Receive1_flatMaintenanceTotal_InputVariable.payload/client:totalBill</from>
+                <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$outputVariable.payload/client:totalBill</to>
+            </copy>
+        </assign>
+        <!-- 
+          Asynchronous callback to the requester. (Note: the callback location and correlation id is transparently handled using WS-addressing.)
+        -->
+        <invoke name="callbackClient" partnerLink="flatmaintenancebpel_client" portType="client:flatMaintenanceBPELCallback" operation="processResponse" inputVariable="outputVariable"
+                bpelx:invokeAsDetail="no"/>
+    </sequence>
+</process>

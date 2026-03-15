@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+     name="ErrorBPEL"
+     targetNamespace="http://xmlns.oracle.com/mypractice/Error/ErrorBPEL"
+     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+     xmlns:client="http://xmlns.oracle.com/mypractice/Error/ErrorBPEL"
+     xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    >
+    <wsdl:documentation>
+        <abstractWSDL>http://Srinivas:7101/soa-infra/services/default/Error!1.1/WSDLs/ErrorBPEL.wsdl</abstractWSDL>
+    </wsdl:documentation>
+    <plnk:partnerLinkType name="ErrorBPEL">
+        <plnk:role name="ErrorBPELProvider" portType="client:ErrorBPEL"/>
+    </plnk:partnerLinkType>
+    <wsdl:types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema">
+            <import namespace="http://xmlns.oracle.com/mypractice/Error/ErrorBPEL" schemaLocation="../Schemas/ErrorBPEL_1.xsd"/>
+        </schema>
+    </wsdl:types>
+    <wsdl:message name="ErrorBPELRequestMessage">
+        <wsdl:part name="payload" element="client:process"/>
+    </wsdl:message>
+    <wsdl:portType name="ErrorBPEL">
+        <wsdl:operation name="process">
+            <wsdl:input message="client:ErrorBPELRequestMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="ErrorBPELBinding" type="client:ErrorBPEL">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="process">
+            <soap:operation style="document" soapAction="process"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="errorbpel_client_ep">
+        <wsdl:port name="ErrorBPEL_pt" binding="client:ErrorBPELBinding">
+            <soap:address location="http://Srinivas:7101/soa-infra/services/default/Error/errorbpel_client_ep"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

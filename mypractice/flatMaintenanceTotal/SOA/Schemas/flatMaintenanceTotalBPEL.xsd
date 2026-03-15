@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<schema attributeFormDefault="unqualified"
+	elementFormDefault="qualified"
+	targetNamespace="http://xmlns.oracle.com/mypractice/flatMaintenanceTotal/flatMaintenanceTotalBPEL"
+	xmlns="http://www.w3.org/2001/XMLSchema">
+	<element name="flatMaintenanceTotal">
+		<complexType>
+			<sequence>
+				<element name="flatNo" type="string"/>
+                                <element name="flatOwner" type="string"/>
+                                <element name="currentBill" type="integer"/>
+                                <element name="maintenance" type="integer"/>
+                                <element name="waterBill" type="integer"/>
+			</sequence>
+		</complexType>
+	</element>
+</schema>

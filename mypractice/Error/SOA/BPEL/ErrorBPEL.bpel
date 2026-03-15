@@ -1,0 +1,103 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Wed Feb 18 10:46:47 IST 2026
+  Author:  sreen
+  Type: BPEL 2.0 Process
+  Purpose: One Way BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="ErrorBPEL"
+               targetNamespace="http://xmlns.oracle.com/mypractice/Error/ErrorBPEL"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/mypractice/Error/ErrorBPEL"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+               xmlns:ui="http://xmlns.oracle.com/soa/designer"
+               xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/mypractice/Error/faultAuditLogReference"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/top/faultAuditLogReference"
+         xmlns:ns3="http://xmlns.oracle.com/pcbpel/adapter/db/mypractice/Error/dbReference"
+         xmlns:ns4="http://xmlns.oracle.com/pcbpel/adapter/db/top/dbReference">
+
+  <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/mypractice/Error/ErrorBPEL" location="../WSDLs/ErrorBPEL.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  --> 
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="errorbpel_client" partnerLinkType="client:ErrorBPEL" myRole="ErrorBPELProvider"/>
+    <partnerLink name="dbReference" partnerLinkType="ns3:dbReference_plt" partnerRole="dbReference_role"/>
+  </partnerLinks>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable" messageType="client:ErrorBPELRequestMessage"/>
+    <variable name="DBinsert_InputVariable" messageType="ns3:ErrorLogCollection_msg"/>
+  </variables>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+
+    <!-- Receive input from requestor. (Note: This maps to operation defined in ErrorBPEL.wsdl) -->
+    <receive name="receiveInput" partnerLink="errorbpel_client" portType="client:ErrorBPEL" operation="process" variable="inputVariable" createInstance="yes"/>
+    <assign name="Assign1">
+      <copy>
+        <from>$inputVariable.payload/client:FlowID</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$DBinsert_InputVariable.ErrorLogCollection/ns4:ErrorLog/ns4:flowid</to>
+      </copy>
+      <copy>
+        <from>$inputVariable.payload/client:Fault_Code</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$DBinsert_InputVariable.ErrorLogCollection/ns4:ErrorLog/ns4:faultCode</to>
+      </copy>
+      <copy>
+        <from>$inputVariable.payload/client:Fault_Summery</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$DBinsert_InputVariable.ErrorLogCollection/ns4:ErrorLog/ns4:faultSummery</to>
+      </copy>
+      <copy>
+        <from>$inputVariable.payload/client:Fault_Details</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$DBinsert_InputVariable.ErrorLogCollection/ns4:ErrorLog/ns4:faultDetails</to>
+      </copy>
+      <copy>
+        <from>$inputVariable.payload/client:Attribut1</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$DBinsert_InputVariable.ErrorLogCollection/ns4:ErrorLog/ns4:attribut1</to>
+      </copy>
+      <copy>
+        <from>$inputVariable.payload/client:Attribut2</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$DBinsert_InputVariable.ErrorLogCollection/ns4:ErrorLog/ns4:attribut2</to>
+      </copy>
+      <copy>
+        <from>$inputVariable.payload/client:Attribut3</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$DBinsert_InputVariable.ErrorLogCollection/ns4:ErrorLog/ns4:attribut3</to>
+      </copy>
+      <copy>
+        <from>$inputVariable.payload/client:Attribut4</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$DBinsert_InputVariable.ErrorLogCollection/ns4:ErrorLog/ns4:attribut4</to>
+      </copy>
+    </assign>
+    <invoke name="Invoke1" inputVariable="DBinsert_InputVariable"
+            partnerLink="dbReference" portType="ns3:dbReference_ptt" operation="insert" bpelx:invokeAsDetail="no"/>
+  </sequence>
+</process>

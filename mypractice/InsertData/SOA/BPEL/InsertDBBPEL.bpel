@@ -1,0 +1,77 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<!--
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  Oracle JDeveloper BPEL Designer 
+  
+  Created: Sat Feb 14 16:13:12 IST 2026
+  Author:  sreen
+  Type: BPEL 2.0 Process
+  Purpose: One Way BPEL Process
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+-->
+<process name="InsertDBBPEL"
+               targetNamespace="http://xmlns.oracle.com/mypractice/InsertData/InsertDBBPEL"
+               xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+               xmlns:client="http://xmlns.oracle.com/mypractice/InsertData/InsertDBBPEL"
+               xmlns:ora="http://schemas.oracle.com/xpath/extension"
+               xmlns:bpelx="http://schemas.oracle.com/bpel/extension"
+               xmlns:ui="http://xmlns.oracle.com/soa/designer"
+               xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:ns1="http://xmlns.oracle.com/pcbpel/adapter/db/mypractice/InsertData/dbReference"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:ns2="http://xmlns.oracle.com/pcbpel/adapter/db/top/dbReference">
+
+  <import ui:processWSDL="true" namespace="http://xmlns.oracle.com/mypractice/InsertData/InsertDBBPEL" location="../WSDLs/InsertDBBPEL.wsdl" importType="http://schemas.xmlsoap.org/wsdl/"/>
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      PARTNERLINKS                                                      
+      List of services participating in this BPEL process               
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  --> 
+  <partnerLinks>
+    <!-- 
+      The 'client' role represents the requester of this service. It is 
+      used for callback. The location and correlation information associated
+      with the client role are automatically set using WS-Addressing.
+    -->
+    <partnerLink name="insertdbbpel_client" partnerLinkType="client:InsertDBBPEL" myRole="InsertDBBPELProvider"/>
+    <partnerLink name="dbReference" partnerLinkType="ns1:dbReference_plt" partnerRole="dbReference_role"/>
+  </partnerLinks>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      VARIABLES                                                        
+      List of messages and XML documents used within this BPEL process 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <variables>
+    <!-- Reference to the message passed as input during initiation -->
+    <variable name="inputVariable" messageType="client:InsertDBBPELRequestMessage"/>
+    <variable name="Invoke1_insert_InputVariable" messageType="ns1:DistributedtransactionCollection_msg"/>
+  </variables>
+
+  <!-- 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ORCHESTRATION LOGIC                                               
+     Set of activities coordinating the flow of messages across the    
+     services integrated within this business process                  
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  -->
+  <sequence name="main">
+
+    <!-- Receive input from requestor. (Note: This maps to operation defined in InsertDBBPEL.wsdl) -->
+    <receive name="receiveInput" partnerLink="insertdbbpel_client" portType="client:InsertDBBPEL" operation="process" variable="inputVariable" createInstance="yes"/>
+    <assign name="Assign1">
+      <copy>
+        <from>$inputVariable.payload/client:num</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$Invoke1_insert_InputVariable.DistributedtransactionCollection/ns2:Distributedtransaction/ns2:num</to>
+      </copy>
+      <copy>
+        <from>$inputVariable.payload/client:name</from>
+        <to expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">$Invoke1_insert_InputVariable.DistributedtransactionCollection/ns2:Distributedtransaction/ns2:name</to>
+      </copy>
+    </assign>
+    <invoke name="Invoke1" partnerLink="dbReference" portType="ns1:dbReference_ptt"
+            operation="insert" inputVariable="Invoke1_insert_InputVariable" bpelx:invokeAsDetail="no"/>
+  </sequence>
+</process>

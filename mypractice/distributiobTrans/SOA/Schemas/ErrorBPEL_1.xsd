@@ -1,0 +1,18 @@
+<?xml version= '1.0' encoding= 'UTF-8' ?>
+<schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://xmlns.oracle.com/mypractice/Error/ErrorBPEL"
+     xmlns="http://www.w3.org/2001/XMLSchema">
+    <element name="process">
+        <complexType>
+            <sequence>
+                <element name="FlowID" type="integer"/>
+                <element name="Fault_Code" type="string"/>
+                <element name="Fault_Summery" type="string"/>
+                <element name="Fault_Details" type="string"/>
+                <element name="Attribut1" type="string"/>
+                <element name="Attribut2" type="string"/>
+                <element name="Attribut3" type="string"/>
+                <element name="Attribut4" type="string"/>
+            </sequence>
+        </complexType>
+    </element>
+</schema>
