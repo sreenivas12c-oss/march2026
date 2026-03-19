@@ -36,5 +36,6 @@
       <hash><url n="URL" path="inlineSubProcess/inlineSubProcess.jpr"/></hash>
       <hash><url n="URL" path="InsertData/InsertData.jpr"/></hash>
       <hash><url n="URL" path="StandAloneSubProcess/StandAloneSubProcess.jpr"/></hash>
+      <hash><url n="URL" path="subtractionBPEL/subtractionBPEL.jpr"/></hash>
    </list>
 </jws:workspace>
